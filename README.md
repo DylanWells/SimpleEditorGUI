@@ -1,1 +1,2 @@
-##Editor GUI\n######An exercise in Swing
+##Editor GUI
+######An exercise in Swing
