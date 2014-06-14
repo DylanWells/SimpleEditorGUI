@@ -26,7 +26,7 @@ public class MyFont {
     private Integer fontLeading;
     private Integer charWidth;
     
-    MyFont(String name,File source,float size,int type) {
+    MyFont(File source,float size,int type) {
         try {
         try{
         theFont = Font.createFont(Font.TRUETYPE_FONT,source).deriveFont(type,size);
@@ -38,7 +38,6 @@ public class MyFont {
         myFontSize = size;
         metricMap = new HashMap<String,Integer>();
         buildMetrics();
-     //   makeFont(name,this);
     }
     
     public Font thisFont() {
@@ -48,7 +47,7 @@ public class MyFont {
     public int getMetric(String metric) {
         return metricMap.get(metric);
     } 
-    
+
     private void buildMetrics() {
         BufferedImage bi = 
         new BufferedImage(1,1,BufferedImage.TYPE_INT_ARGB_PRE);

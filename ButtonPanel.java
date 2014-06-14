@@ -4,6 +4,10 @@ import javax.swing.*;
 import javax.swing.event.*;
 
 public class ButtonPanel extends JPanel {
+
+    private static final String dirPath = System.getProperty("user.dir");
+    private static final String iconPath = dirPath+"/img/whitemed.png";
+
     private static final Color[] colorStatesA = 
     {new Color(100,100,100),new Color(75,75,75),new Color(125,125,125)};
     
@@ -22,16 +26,18 @@ public class ButtonPanel extends JPanel {
         panelSet.gridy = 0; 
         panelSet.fill = GridBagConstraints.BOTH;
         
-        StandardButton buttonA = new StandardButton(colorStatesA);
+        //StandardButton buttonA = new StandardButton(colorStatesA);
         //addActionListener(new ActionAdapter());
+        AnimatedButton impButton = new AnimatedButton(iconPath);
         panelSet.gridx = 0;               
-        panelGrid.setConstraints(buttonA,panelSet);
-        add(buttonA);
+        panelGrid.setConstraints(impButton,panelSet);
+        add(impButton);
         
-        StandardButton buttonB = new StandardButton(colorStatesB);
+        //StandardButton buttonB = new StandardButton(colorStatesB);
+        AnimatedButton expButton = new AnimatedButton(iconPath);
         panelSet.gridx = 1;       
-        panelGrid.setConstraints(buttonB,panelSet);
-        add(buttonB);
+        panelGrid.setConstraints(expButton,panelSet);
+        add(expButton);
     }
     
     @Override
@@ -76,7 +82,7 @@ public class ButtonPanel extends JPanel {
             this.repaint();
         }
         @Override
-        public void mouseExited(MouseEvent e)] {
+        public void mouseExited(MouseEvent e) {
             isHover = false;
             isPress = false;
             this.repaint();

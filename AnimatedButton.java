@@ -35,13 +35,16 @@ implements MouseListener {
     private BufferedImage icon;
 
     private static final String dirPath = System.getProperty("user.dir");
-    private static final String iconPath = dirPath+"/img/whitemed.png";
+    private static final String iconPath = dirPath+"/assets/whitemed.png";
     //private static final ImageIcon iconImage = new ImageIcon(iconPath);
     private ImageIcon iconImage;
     
-    private static final RescaleOp neutralFilter = new RescaleOp(new float[]{0.2f,0.2f,0.2f,1f},new float[4],null);
-    private static final RescaleOp hoverFilter = new RescaleOp(new float[]{0.5f,0.5f,0.5f,1f},new float[4],null);
-    private static final RescaleOp pressFilter = new RescaleOp(new float[]{0.25f,0.25f,0.25f,1f},new float[4],null);
+    private static final RescaleOp neutralFilter = 
+        new RescaleOp(new float[]{0.2f,0.2f,0.2f,1f},new float[4],null);
+    private static final RescaleOp hoverFilter = 
+        new RescaleOp(new float[]{0.5f,0.5f,0.5f,1f},new float[4],null);
+    private static final RescaleOp pressFilter = 
+        new RescaleOp(new float[]{0.25f,0.25f,0.25f,1f},new float[4],null);
     
     private AffineTransform reduceScale = new AffineTransform();
     private AffineTransformOp scaleIcon;
@@ -128,7 +131,7 @@ implements MouseListener {
     private final ActionListener hoverListener = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
-            System.out.println("HOVER TIMER");
+            //System.out.println("HOVER TIMER");
             hoverAlpha += (isHovered ? 1 : -1) * 0.1f;
             hoverAlpha = isHovered ?  Math.min(hoverAlpha, MAX_ALPHA) : Math.max(hoverAlpha, MIN_ALPHA);
             if (hoverAlpha == MIN_ALPHA || hoverAlpha == MAX_ALPHA) {
@@ -141,8 +144,8 @@ implements MouseListener {
     private final ActionListener pressListener = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
-            System.out.println("PRESS TIMER");
-            pressAlpha += (isPressed ? 1 : -1) * 0.1f;
+            //System.out.println("PRESS TIMER");
+            pressAlpha += (isPressed ? 1 : -1) * 0.2f;
             pressAlpha = isPressed ?  Math.min(pressAlpha, MAX_ALPHA) : Math.max(pressAlpha, MIN_ALPHA);
             if (pressAlpha == MIN_ALPHA || pressAlpha == MAX_ALPHA) {
                 pressTimer.stop();
@@ -158,7 +161,7 @@ implements MouseListener {
     @Override
     public void mouseEntered(MouseEvent e) {
         isHovered = true;
-        System.out.println("Entered");
+        //System.out.println("Entered");
         if (!hoverTimer.isRunning()) {
 		  hoverTimer.restart();
 		}
@@ -166,7 +169,7 @@ implements MouseListener {
     @Override
     public void mouseExited(MouseEvent e) {
         isHovered = false;
-        System.out.println("Exited");
+        //System.out.println("Exited");
         if (!hoverTimer.isRunning()) {
 		  hoverTimer.restart();
 		}
@@ -174,7 +177,7 @@ implements MouseListener {
     @Override
     public void mousePressed(MouseEvent e){
         isPressed = true;
-        System.out.println("Pressed");
+        //System.out.println("Pressed");
         if (!pressTimer.isRunning()) {
 		  pressTimer.restart();
 		}
@@ -182,7 +185,7 @@ implements MouseListener {
     @Override
     public void mouseReleased(MouseEvent e) {
         isPressed = false;
-        System.out.println("Released");
+        //System.out.println("Released");
         if (!pressTimer.isRunning()) {
 		  pressTimer.restart();
 		}
