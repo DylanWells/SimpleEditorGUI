@@ -5,10 +5,15 @@ import javax.swing.event.*;
 import javax.swing.text.*;
 import java.util.*;
 import java.lang.*;
-import java.io.File;
+import java.io.*;
+import java.io.IOException;
 
-public class TextEditor extends JPanel implements ComponentListener {
-   public TextEditor(JFrame window, int unit, int asc, int des, File fontFile) {
+
+public class TextEditor extends JPanel 
+implements ComponentListener {
+  
+    public TextEditor() {}
+    public TextEditor(JFrame window, int unit, int asc, int des, File fontFile) {
         super();
         BASE_UNIT = unit;
         WINDOW = new Dimension(window.getPreferredSize());
@@ -20,18 +25,15 @@ public class TextEditor extends JPanel implements ComponentListener {
         
         textEdit = new TextBody();
         scrollEdit = new Scroller();
-        /*
-        lineCountFont = new Font(lineFontInit.thisFont());
-        textEditorFont = new Font(textFontInit.thisFont());
-        */
+  
         setLayout(new BorderLayout());
         add(scrollEdit,BorderLayout.CENTER);
 
         addComponentListener(this);
         window.addWindowListener(new WindowAdapt()); 
 
+        setEnabled(false);
         setStyle();
-        //numPane.setLineStyle();
         setVisible(true);   
     }
 
@@ -69,15 +71,16 @@ public class TextEditor extends JPanel implements ComponentListener {
       ///////////////////////////////
      /////////DRAW CONSTANTS////////
     ///////////////////////////////
-    private static boolean DRAW_GRID = true;
-    private static boolean DRAW_LINE_NUMS = true;
+    public static boolean DRAW_GRID = true;
+    public static boolean DRAW_LINE_NUMS = true;
   ///////////////////////////////////////////////////////////////
  ///////////////////////////////////////////////////////////////    
 ///////////////////////////////////////////////////////////////
 
-    private TextBody textEdit;
-    private Scroller scrollEdit;
+    public static TextBody textEdit;
+    public Scroller scrollEdit;
     private LineNumbers numPane;
+    //private TextBackground textBack;
 
     private MyFont lineFontInit;
     private MyFont textFontInit;
@@ -88,15 +91,17 @@ public class TextEditor extends JPanel implements ComponentListener {
     private StyleContext scriptStyleContext;
     private Style scriptStyle;
     private Style fontStyle;
-    private Document textBody;
+    public Document textBody;
 
     private int leftIndent;   
+
+    //public boolean readText = false;
 
   ///////////////////////////////////////////////////////////////
  ///////////////////////////////////////////////////////////////    
 ///////////////////////////////////////////////////////////////   
 
-    private void updateViewConstants() {
+    public void updateViewConstants() {
           
             VIEW_POINT = scrollEdit.getViewport().getViewPosition();
             VIEW_SIZE = scrollEdit.getViewport().getViewSize();      
@@ -115,35 +120,34 @@ public class TextEditor extends JPanel implements ComponentListener {
             HEIGHT_IN_UNITS = (double)SCROLL_HEIGHT/(double)BASE_UNIT;
             
             DRAW_GRID = true;
-       //     textBG.repaint();
             DRAW_LINE_NUMS = true;
             numPane.repaint();
-        //    repaint();
+            repaint();
     }
 
 ///////////////////////////////////////////////////////////////   
 
     private void setStyle() {        
-        leftIndent =  BASE_UNIT;
-        //textEdit.setMargin(new Insets(FONT_DESCENT,0,0,0));
-        //numPane.setTheLineMargin(FONT_DESCENT,FONT_ASCENT);
-        
+        leftIndent =  BASE_UNIT;    
         scriptStyleContext = new StyleContext();
         scriptDocument = new DefaultStyledDocument(scriptStyleContext);
         scriptStyle = scriptStyleContext.getStyle(StyleContext.DEFAULT_STYLE);
 
         StyleConstants.setLeftIndent(scriptStyle,leftIndent);
         StyleConstants.setSpaceBelow(scriptStyle,FONT_DESCENT-3);
-       // fontStyle = textEdit.addStyle("editorStyle",null);
-       // StyleConstants.setForeground(fontStyle,EDITOR_GREY);
-        //scriptDocument.addStyle("docStyle",scriptStyle);
 
         textEdit.setStyledDocument(scriptDocument);
         updateViewConstants();
     }
 
 ///////////////////////////////////////////////////////////////
-
+/*
+    public void fileToTextBody(String in) {
+        //writeToBody(in);
+        TextBody.setText(in);
+    }
+   */
+///////////////////////////////////////////////////////////////
     @Override
     public void componentHidden(ComponentEvent e) {
         //System.out.println(e.getComponent().getClass().getName() + " --- Hidden");
@@ -216,7 +220,7 @@ public class TextEditor extends JPanel implements ComponentListener {
             lineCount.setOpaque(false);
             lineCount.setEditable(false);
 
-            lineCount.setMargin(new Insets(0,0,0,0));
+            //lineCount.setMargin(new Insets(0,0,0,0));
             lineCount.setFont(lineFontInit.thisFont());
             lineCount.setForeground(LINE_NUM_TXT);
 
@@ -269,7 +273,8 @@ public class TextEditor extends JPanel implements ComponentListener {
         private void insertLineNum() {
             StringBuilder lines = new StringBuilder();
             for(int i=1;i<=(int)Math.ceil(HEIGHT_IN_UNITS);i++) {
-                if(i*BASE_UNIT>=SCROLL_VIEW_TOP && i*BASE_UNIT<SCROLL_VIEW_Y)
+                if(((i*BASE_UNIT)+BASE_UNIT)>=SCROLL_VIEW_TOP && 
+                    ((i*BASE_UNIT)-BASE_UNIT)<SCROLL_VIEW_Y)
                     lines.append(i);
                     lines.append("\n");
             }
@@ -298,7 +303,6 @@ public class TextEditor extends JPanel implements ComponentListener {
                 if(i>=SCROLL_VIEW_TOP && i<SCROLL_HEIGHT)
                         g.fillRect(0,i,getWidth(),BASE_UNIT);
             if(DRAW_LINE_NUMS) {               
-                ////System.out.println("NUMLINE REPAINT");
                 insertLineNum();
                 numPane.repaint();               
             }
@@ -308,43 +312,123 @@ public class TextEditor extends JPanel implements ComponentListener {
 
 ///////////////////////////////////////////////////////////////
 
-    private class TextBody extends JTextPane 
-    implements DocumentListener,CaretListener {   
-        private TextBody() {
+    public class TextBody extends JTextPane 
+    implements DocumentListener,CaretListener { 
+        //public FileInputStream fileOpen;
+        private DefaultHighlighter hiLite;
+        private LinePainter hiLine;
+        private Color hiLineColor = new Color(20,20,20,10);
+
+        public TextBody() {
             super();
             setOpaque(false);
             setEditorKit(new TextWrapKit());
+            setBackground(new Color(255, 255, 255, 0)); 
             setForeground(EDITOR_GREY);
             setFont(textFontInit.thisFont());
+            //this.getComponent(0).
+
+            hiLite = new DefaultHighlighter();
+            setHighlighter(hiLite);
+            hiLite.setDrawsLayeredHighlights(false);
+            hiLine = new LinePainter(this,hiLineColor);
+            
+            
+
+            DefaultCaret myCaret = (DefaultCaret)this.getCaret();
+            myCaret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+            setSelectionColor(new Color(30,30,30,100));
+
             getDocument().addDocumentListener(this);
             addCaretListener(this);
-        }
 
-        /*
-        private void modelUpdate() {
-            VIEW_MODEL = viewToModel(VIEW_POINT);
-            try {
-            MODEL_VIEW = modelToView(VIEW_MODEL);
-            } catch (BadLocationException ble)
-            { ble.printStackTrace(); }
+            //
+            //
+            
+            this.addKeyListener(new KeyListener() {     
+                @Override 
+                public void keyPressed(KeyEvent e) {
+                    DRAW_GRID = true;
+                    //setHighlighter(null);
+                    repaint();
+                }
+                @Override
+                public void keyReleased(KeyEvent e) {
+                    DRAW_GRID = true;
+                    //setHighlighter(hiLite);
+                    repaint();
+                }
+                @Override
+                public void keyTyped(KeyEvent e) {
+                }
+            });
+
         }
-        */
+   
         @Override
         public void caretUpdate(CaretEvent e) {
-            //System.out.println("Caret");
+            //super.repaint();
+            if(MainWindow.initComplete)
+                updateViewConstants();
+            //repaint();
         }
         @Override
         public void insertUpdate(DocumentEvent e) {
-            //System.out.println("insert");
+            //super.repaint();
+            if(MainWindow.initComplete)
+                updateViewConstants();
+            //repaint();
         }
         @Override
         public void removeUpdate(DocumentEvent e) {
-            //System.out.println("remove");
+            //super.repaint();
+            if(MainWindow.initComplete)
+                updateViewConstants();
+            //repaint();
         }
         @Override
         public void changedUpdate(DocumentEvent e) {
-            //System.out.println("change");
+            //super.repaint();
+            if(MainWindow.initComplete)
+                updateViewConstants();
+            //repaint();
         }  
 
+    }
+ 
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        
+        if(DRAW_GRID) {
+        DRAW_LINE_NUMS = true;
+    
+        g.setColor(LIGHT_GREY);
+        for(int y=BASE_UNIT/2;y<SCROLL_HEIGHT;y+=BASE_UNIT/2)                 
+                if(y>=SCROLL_VIEW_TOP && y<SCROLL_HEIGHT)
+                    g.drawLine(0,y-SCROLL_VIEW_TOP,SCROLL_VIEW_X+50,y-SCROLL_VIEW_TOP);                
+        for(int x=BASE_UNIT/2; x<SCROLL_VIEW_X; x+=BASE_UNIT/2)
+                if(x<=SCROLL_VIEW_X)
+                    g.drawLine(x+50,0,x+50,SCROLL_VIEW_X+50);
+
+        g.setColor(MEDIUM_GREY);
+        for(int y=BASE_UNIT;y<SCROLL_HEIGHT;y+=BASE_UNIT)                 
+                if(y>=SCROLL_VIEW_TOP && y<SCROLL_HEIGHT)
+                    g.drawLine(0,y-SCROLL_VIEW_TOP,SCROLL_VIEW_X+50,y-SCROLL_VIEW_TOP);                
+        for(int x=BASE_UNIT; x<SCROLL_VIEW_X; x+=BASE_UNIT)
+                if(x<=SCROLL_VIEW_X)
+                    g.drawLine(x+50,0,x+50,SCROLL_VIEW_X+50);
+
+        g.setColor(DARK_GREY);
+        for(int y=BASE_UNIT*4;y<SCROLL_HEIGHT;y+=BASE_UNIT*4)                 
+                if(y>=SCROLL_VIEW_TOP && y<SCROLL_HEIGHT)
+                    g.drawLine(0,y-SCROLL_VIEW_TOP,SCROLL_VIEW_X+50,y-SCROLL_VIEW_TOP);                
+        for(int x=BASE_UNIT*4; x<SCROLL_VIEW_X; x+=BASE_UNIT*4)
+                if(x<=SCROLL_VIEW_X)
+                    g.drawLine(x+50,0,x+50,SCROLL_VIEW_X+50);
+
+        DRAW_GRID = false;       
+        }
+    
     }
 }

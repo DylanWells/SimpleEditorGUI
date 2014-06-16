@@ -27,13 +27,11 @@ public class MyFont {
     private Integer charWidth;
     
     MyFont(File source,float size,int type) {
-        try {
-        try{
-        theFont = Font.createFont(Font.TRUETYPE_FONT,source).deriveFont(type,size);
-        } catch(IOException ioe)
-        { ioe.printStackTrace(); }
-        } catch(FontFormatException ffe) 
-        { ffe.printStackTrace(); } 
+        try { try{
+        theFont = 
+        Font.createFont(Font.TRUETYPE_FONT,source).deriveFont(type,size);} 
+        catch(IOException ioe) { ioe.printStackTrace(); }} 
+        catch(FontFormatException ffe) { ffe.printStackTrace(); } 
 
         myFontSize = size;
         metricMap = new HashMap<String,Integer>();
@@ -66,10 +64,4 @@ public class MyFont {
         metricMap.put("leading",fontLeading);
         metricMap.put("char",charWidth);
     }
-
-    /*
-    private void makeFont(String name,MyFont font) {
-        fontMap.put(name,font);
-    }
-    */
 }

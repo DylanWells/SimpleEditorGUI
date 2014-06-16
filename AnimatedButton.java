@@ -15,6 +15,25 @@ import java.io.IOException;
 public class AnimatedButton extends JButton
 implements MouseListener {
 
+    public AnimatedButton(Action a) {
+           this();
+           setAction(a);
+    }
+    public AnimatedButton(){
+        hoverTimer = new Timer(20,hoverListener);
+        pressTimer = new Timer(15,pressListener);
+        addMouseListener(this);
+           
+        setContentAreaFilled(false);
+        setFocusPainted(false);
+        setBorderPainted(false);
+        setOpaque(false);
+        
+        hoverTimer.start();
+        pressTimer.start();
+        repaint();
+    }
+
     private static final float MIN_ALPHA = 0f;
     private static final float MAX_ALPHA = 1f;
     private float hoverAlpha = MIN_ALPHA;
@@ -26,7 +45,7 @@ implements MouseListener {
     private final Timer hoverTimer;
     private final Timer pressTimer;
 
-    private Color neutralColor = new Color(100,100,100);
+    private Color neutralColor = new Color(85,85,85);
     private Color hoverColor = new Color(50,50,50);
     private Color pressColor = new Color(225,145,0);
     
@@ -34,13 +53,16 @@ implements MouseListener {
     private BufferedImage neutral;
     private BufferedImage icon;
 
-    private static final String dirPath = System.getProperty("user.dir");
-    private static final String iconPath = dirPath+"/assets/whitemed.png";
-    //private static final ImageIcon iconImage = new ImageIcon(iconPath);
+    public String buttonName;
+/*
+    private final String dirPath = System.getProperty("user.dir");
+*/
+    private String iconPath;// = dirPath+"/assets/whitemed.png";
+   
     private ImageIcon iconImage;
     
     private static final RescaleOp neutralFilter = 
-        new RescaleOp(new float[]{0.2f,0.2f,0.2f,1f},new float[4],null);
+        new RescaleOp(new float[]{0.235f,0.235f,0.235f,1f},new float[4],null);
     private static final RescaleOp hoverFilter = 
         new RescaleOp(new float[]{0.5f,0.5f,0.5f,1f},new float[4],null);
     private static final RescaleOp pressFilter = 
@@ -50,41 +72,21 @@ implements MouseListener {
     private AffineTransformOp scaleIcon;
                                                                           
 
-    AnimatedButton(String iconLink) {
-        iconImage = new ImageIcon(iconLink);
+    public void setAnimatedButton(String name,String iconLink) {
+       // refresh = new TextEditor();
+        setEnabled(false);
+        //iconImage = new ImageIcon(iconLink);
+        iconPath = iconLink;
+        buttonName = name;
         loadImage();
         reduceScale.scale(0.8, 0.8);
-        scaleIcon = new AffineTransformOp(reduceScale,AffineTransformOp.TYPE_BICUBIC);
-        
-        hoverTimer = new Timer(20,hoverListener);
-        pressTimer = new Timer(15,pressListener);
-        addMouseListener(this);
-        
-        setContentAreaFilled(false);
-    	  setFocusPainted(false);
-      	setBorderPainted(false);
-    	  setOpaque(false);
-        
-        hoverTimer.start();
-        pressTimer.start();
-        repaint();
+        scaleIcon = new AffineTransformOp(reduceScale,AffineTransformOp.TYPE_BICUBIC);          
     }
-/*
-    private static void testButton() {
-        JFrame window = new JFrame("Button Test");
-        window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);        
-        window.setLocationRelativeTo(null);
-        window.setLayout(new BorderLayout());
-        window.setPreferredSize(new Dimension(250,250));
-        window.getContentPane().add(new AnimatedButton(),BorderLayout.CENTER);
-        window.pack();
-        window.setVisible(true);
-    }
-*/    
+  
     private void loadImage() {
         source = new BufferedImage(100, 100, BufferedImage.TYPE_INT_ARGB);        
         try {
-        source = ImageIO.read(new File(iconPath));
+            source = ImageIO.read(new File(iconPath));
         } catch(IOException ioe) { ioe.printStackTrace(); }
     }    
 
@@ -95,14 +97,18 @@ implements MouseListener {
        
        int sourceWidth = source.getWidth()/2;
        int sourceHeight = source.getHeight()/2;
+       int xPlace = this.getWidth()/2-25;
+       int yPlace = 0;
+      // System.out.println(yPlace);
+/*
        int xPlace = this.getWidth()-sourceWidth;
        int yPlace = this.getHeight()-sourceHeight;
-       
+  */     
        g2d.setPaint(neutralColor);
        g2d.fillRect(0,0,getSize().width,getSize().height);
        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
        RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-       g2d.scale(.5,.5);
+      // g2d.scale(.5,.5);
        g2d.drawImage(source,neutralFilter,xPlace,yPlace);
        
        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,hoverAlpha));
@@ -131,12 +137,17 @@ implements MouseListener {
     private final ActionListener hoverListener = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
-            //System.out.println("HOVER TIMER");
             hoverAlpha += (isHovered ? 1 : -1) * 0.1f;
-            hoverAlpha = isHovered ?  Math.min(hoverAlpha, MAX_ALPHA) : Math.max(hoverAlpha, MIN_ALPHA);
+
+            hoverAlpha = isHovered ?  
+            Math.min(hoverAlpha, MAX_ALPHA) : 
+            Math.max(hoverAlpha, MIN_ALPHA);
+
             if (hoverAlpha == MIN_ALPHA || hoverAlpha == MAX_ALPHA) {
                 hoverTimer.stop();
             }
+            TextEditor.DRAW_GRID = true;
+            TextEditor.DRAW_LINE_NUMS = true;
             repaint();
         }
     };
@@ -144,14 +155,18 @@ implements MouseListener {
     private final ActionListener pressListener = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
-            //System.out.println("PRESS TIMER");
-            pressAlpha += (isPressed ? 1 : -1) * 0.2f;
-            pressAlpha = isPressed ?  Math.min(pressAlpha, MAX_ALPHA) : Math.max(pressAlpha, MIN_ALPHA);
+            pressAlpha += (isPressed ? 1 : -1) * 0.1f;
+            pressAlpha = isPressed ?  
+            Math.min(pressAlpha, MAX_ALPHA) : Math.max(pressAlpha, MIN_ALPHA);
             if (pressAlpha == MIN_ALPHA || pressAlpha == MAX_ALPHA) {
                 pressTimer.stop();
             }
+            TextEditor.DRAW_GRID = true;
+            TextEditor.DRAW_LINE_NUMS = true;
             repaint();
+            System.out.println(e.getSource());
         }
+        
     };
 
 
@@ -163,7 +178,7 @@ implements MouseListener {
         isHovered = true;
         //System.out.println("Entered");
         if (!hoverTimer.isRunning()) {
-		  hoverTimer.restart();
+		      hoverTimer.restart();
 		}
     }
     @Override
@@ -171,7 +186,7 @@ implements MouseListener {
         isHovered = false;
         //System.out.println("Exited");
         if (!hoverTimer.isRunning()) {
-		  hoverTimer.restart();
+          hoverTimer.restart();
 		}
     }
     @Override
@@ -179,24 +194,21 @@ implements MouseListener {
         isPressed = true;
         //System.out.println("Pressed");
         if (!pressTimer.isRunning()) {
-		  pressTimer.restart();
+		      pressTimer.restart();
 		}
     }
     @Override
     public void mouseReleased(MouseEvent e) {
         isPressed = false;
         //System.out.println("Released");
+        //System.out.println("HEY");
         if (!pressTimer.isRunning()) {
-		  pressTimer.restart();
+		      pressTimer.restart();
 		}
-    }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run()  {
-                //testButton();
-            }
-        });
+        System.out.println(e.getComponent().getName());
+        
+        //JFileChooser jc = new JFileChooser();
+        //int userInp = jc.showOpenDialog(null);
     }
 }
