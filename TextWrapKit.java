@@ -1,3 +1,13 @@
+/*
+
+
+ATTENTION: I (Dylan Wells) did not write this. 
+    It is the standard way to fix JTextPane 
+    text wrapping behaviour that changed in
+    Java 7.
+
+*/
+
 import javax.swing.text.View;
 import javax.swing.text.ViewFactory;
 import javax.swing.text.LabelView;
